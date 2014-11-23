@@ -102,7 +102,7 @@ StatementList ::= StatementList Statement
 
 Statement ::= Matched | Unmatched;
 
-Unmatched ::= IF Expr Statement | IF Expr Matched ELSE Unmatched;
+Unmatched ::= IF Expr Statement | IF Expr Matched ELSE Unmached;
 
 Matched ::= Designator JEDNAKO Expr TACKA_ZAREZ
 			|

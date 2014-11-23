@@ -2,10 +2,5 @@ program MJProgram
 int x;int y;
 {
 	int main()
-	{
-		print(1);
-		
-		x=y+4+;
-		print(2);
-	}
+	{}
 }

@@ -27,7 +27,6 @@ public static void main(String[] argv) throws Exception{
         Symbol s = p.parse();  //pocetak parsiranja
         
       //  log.info("Print calls = " + p.printCallCount);
-        System.out.println("Broj poziva funkcije PRINT: "+ p.printCallCount);
         
 	} 
 	finally {

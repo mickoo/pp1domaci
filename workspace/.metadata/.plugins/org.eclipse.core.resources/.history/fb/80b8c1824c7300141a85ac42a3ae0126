@@ -21,7 +21,7 @@ parser code {:
  
     }
   
-    public void syntax_error(Symbol cur_token) {
+    public void syntax_error(Symbol cur_token) {System.out.println("Proba");
         report_error("\nSintaksna greska", cur_token);
         
     }
@@ -55,12 +55,10 @@ scan with {:
 terminal PROGRAM , O_VIT_ZAG, Z_VIT_ZAG,TACKA_ZAREZ, O_ZAG, Z_ZAG, ZAREZ,PRINT,RETURN,PLUS,JEDNAKO,VOID;
 terminal Integer NUMBER ;
 terminal String IDENT;
-terminal IF , ELSE;
 
 non terminal Program, VarDeclList, MethodDeclList,VarDecl,Type,MethodDecl,FormalParamList;
 non terminal FormalParamDecl,FormPars,Addop,Factor,ActualPars,ActualParamList;
 non terminal Statement,StatementList,Designator,Expr,Term;
-non terminal Matched,Unmatched;
 
 
 
@@ -100,22 +98,13 @@ StatementList ::= StatementList Statement
 				/*epsilon*/
 				;
 
-Statement ::= Matched | Unmatched;
-
-Unmatched ::= IF Expr Statement | IF Expr Matched ELSE Unmatched;
-
-Matched ::= Designator JEDNAKO Expr TACKA_ZAREZ
+Statement ::= Designator JEDNAKO Expr TACKA_ZAREZ
 			|
-			Designator JEDNAKO error TACKA_ZAREZ
-			|
-			PRINT O_ZAG Expr Z_ZAG TACKA_ZAREZ {: parser.printCallCount++; :}
+			PRINT O_ZAG Expr Z_ZAG TACKA_ZAREZ {: printCallCount++; :}
 			|
 			RETURN Expr TACKA_ZAREZ
 			|
 			RETURN TACKA_ZAREZ
-			|
-			IF Expr Matched ELSE Matched
-			
 			;				
 
 Expr ::= Expr Addop Term

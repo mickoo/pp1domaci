@@ -60,7 +60,6 @@ terminal IF , ELSE;
 non terminal Program, VarDeclList, MethodDeclList,VarDecl,Type,MethodDecl,FormalParamList;
 non terminal FormalParamDecl,FormPars,Addop,Factor,ActualPars,ActualParamList;
 non terminal Statement,StatementList,Designator,Expr,Term;
-non terminal Matched,Unmatched;
 
 
 
@@ -100,11 +99,7 @@ StatementList ::= StatementList Statement
 				/*epsilon*/
 				;
 
-Statement ::= Matched | Unmatched;
-
-Unmatched ::= IF Expr Statement | IF Expr Matched ELSE Unmatched;
-
-Matched ::= Designator JEDNAKO Expr TACKA_ZAREZ
+Statement ::= Designator JEDNAKO Expr TACKA_ZAREZ
 			|
 			Designator JEDNAKO error TACKA_ZAREZ
 			|
@@ -114,8 +109,9 @@ Matched ::= Designator JEDNAKO Expr TACKA_ZAREZ
 			|
 			RETURN TACKA_ZAREZ
 			|
-			IF Expr Matched ELSE Matched
-			
+			IF Expr Statement ELSE Statement
+			|
+			IF Statement
 			;				
 
 Expr ::= Expr Addop Term
