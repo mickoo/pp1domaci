@@ -55,45 +55,109 @@ scan with {:
 terminal PROGRAM , O_VIT_ZAG, Z_VIT_ZAG,TACKA_ZAREZ, O_ZAG, Z_ZAG, ZAREZ,PRINT,RETURN,PLUS,JEDNAKO,VOID;
 terminal Integer NUMBER ;
 terminal String IDENT;
-terminal IF , ELSE;
+terminal IF , ELSE, CONST,CHAR_CONST,BOOL_CONST,STR_CONST,O_UGL_ZAG, Z_UGL_ZAG,CLASS,EXTENDS,WHILE,BREAK,READ,ILI,I,PLUS_PLUS,MINUS_MINUS;
+terminal MINUS,NEW,TACKA,JEDNAKO_JEDNAKO,MANJE,VECE,VECE_JEDNAKO,MANJE_JEDNAKO,PUTA,PODELJENO,PROCENAT,UZVICNIK_JEDNAKO;
 
-non terminal Program, VarDeclList, MethodDeclList,VarDecl,Type,MethodDecl,FormalParamList;
-non terminal FormalParamDecl,FormPars,Addop,Factor,ActualPars,ActualParamList;
+non terminal Program, VarDeclList, MethodDeclList,VarDecl,Type,MethodDecl;
+non terminal FormPars,Addop,Factor,ActualPars;
 non terminal Statement,StatementList,Designator,Expr,Term;
-non terminal Matched,Unmatched;
+non terminal Matched,Unmatched,Something;
 
+non terminal DeclList,Val,AssignValList,AssignVal ,Decl,ConstDecl,ClassDecl,Niz,IdList,Id;
+non terminal Prefix,FormParamDecList,FormParamDec,Condition,ActPars,ActList,CondTerm,Act,CondList,Cond,CondFact,FactList,Fact;
+non terminal Relop,AddTermList,AddTerm,MulFacList,MulFac,Mulop,DesList,Des;
 
+Program ::= PROGRAM IDENT DeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG;
 
-Program ::= PROGRAM IDENT VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG;
+DeclList ::= DeclList Decl
+			|
+			/*epsilon*/
+			;
+
+Decl ::= ConstDecl
+		|
+		VarDecl
+		|
+		ClassDecl
+		;
+			
+ConstDecl ::= CONST Type IDENT JEDNAKO Val  AssignValList  TACKA_ZAREZ;
+
+AssignValList ::= AssignValList AssignVal
+				|
+				/*epsilon*/
+				;
+
+AssignVal ::=ZAREZ IDENT JEDNAKO Val ;
+
+Val ::= NUMBER
+		|
+		CHAR_CONST 
+		|
+		BOOL_CONST
+		|
+		STR_CONST
+		;			
+
 
 VarDeclList ::= VarDeclList VarDecl
 				|
 				/*epsilon*/
-				;
-				
-VarDecl ::= Type IDENT TACKA_ZAREZ ;
+				;				
+VarDecl ::= Type IDENT Niz IdList TACKA_ZAREZ ;
+			
+IdList ::= IdList Id
+			|
+			/*epsilon*/
+			;	
+					
+Id ::= ZAREZ IDENT Niz ;
+			
+Niz ::= O_UGL_ZAG Z_UGL_ZAG
+		|
+		/*epsilon*/
+		;
+			
 
-Type ::= IDENT ;
+
+
+ClassDecl ::= CLASS IDENT EXTENDS Type O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG
+			  |
+			  CLASS IDENT  O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG
+			  |
+			  CLASS IDENT EXTENDS Type O_VIT_ZAG VarDeclList  Z_VIT_ZAG
+			  |
+			  CLASS IDENT O_VIT_ZAG VarDeclList  Z_VIT_ZAG
+				;
+
+
 
 MethodDeclList ::= MethodDeclList MethodDecl
 				|
 				/*epsilon*/
 				;
 
-MethodDecl ::= Type IDENT O_ZAG FormPars Z_ZAG VarDeclList O_VIT_ZAG StatementList Z_VIT_ZAG ;
+MethodDecl ::= Prefix IDENT O_ZAG FormPars Z_ZAG VarDeclList O_VIT_ZAG StatementList Z_VIT_ZAG ;
 
-FormPars ::= FormalParamList 	
+Prefix ::=  Type
+			|
+			VOID
+			;
+
+FormPars ::= Type IDENT Niz FormParamDecList
 			|
 			/*epsilon*/
 			;
+
+FormParamDecList ::= FormParamDecList FormParamDec
+					|
+					/*epsilon*/
+					;
 			
 
-FormalParamList ::= FormalParamList ZAREZ FormalParamDecl
-					|
-					FormalParamDecl
-					;
+FormParamDec ::= 	ZAREZ Type IDENT Niz ;
 					
-FormalParamDecl ::= Type IDENT ;
+Type ::= IDENT ;
 
 StatementList ::= StatementList Statement
 				|
@@ -102,46 +166,139 @@ StatementList ::= StatementList Statement
 
 Statement ::= Matched | Unmatched;
 
-Unmatched ::= IF Expr Statement | IF Expr Matched ELSE Unmatched;
+Unmatched ::= IF O_ZAG Condition Z_ZAG Statement | IF O_ZAG Condition Z_ZAG Matched ELSE Unmatched;
 
-Matched ::= Designator JEDNAKO Expr TACKA_ZAREZ
+Matched ::= Designator Something TACKA_ZAREZ
 			|
-			Designator JEDNAKO error TACKA_ZAREZ
+			WHILE O_ZAG Condition Z_ZAG Matched   /*MOZE BITI PROBLEM STO NE STOJI Statement UMESTO Matched */
 			|
-			PRINT O_ZAG Expr Z_ZAG TACKA_ZAREZ {: parser.printCallCount++; :}
+			BREAK TACKA_ZAREZ
+			|
+			READ O_ZAG Designator Z_ZAG TACKA_ZAREZ
+			|
+			PRINT O_ZAG Expr Z_ZAG TACKA_ZAREZ
+			|
+			PRINT O_ZAG Expr ZAREZ NUMBER Z_ZAG TACKA_ZAREZ
+			|
+			O_VIT_ZAG StatementList  Z_VIT_ZAG
 			|
 			RETURN Expr TACKA_ZAREZ
 			|
-			RETURN TACKA_ZAREZ
+			RETURN TACKA_ZAREZ  
 			|
-			IF Expr Matched ELSE Matched
+			IF O_ZAG Condition Z_ZAG Matched ELSE Matched
+			;
 			
-			;				
+Something ::= JEDNAKO Expr 
+			|
+			O_ZAG ActPars Z_ZAG
+			|
+			PLUS_PLUS
+			|
+			MINUS_MINUS
+			; 							
 
-Expr ::= Expr Addop Term
+ActPars ::= Expr ActList
+			|
+			/*epsilon*/
+			 ;
+
+ActList ::= ActList Act
+			|
+			/*epsilon*/
+			;
+
+Act ::= ZAREZ Expr;
+
+
+
+Condition ::= CondTerm CondList;
+
+CondList ::= CondList Cond
+			|
+			/*epsilon*/
+			;
+
+Cond ::= ILI CondTerm;
+
+CondTerm ::= CondFact FactList ;
+
+FactList ::= FactList Fact
 		|
-		Term
+		/*epsilon*/
+		; 
+Fact ::= I CondFact;	
+
+CondFact ::= Expr
+			|
+			Expr Relop Expr
+			;	
+
+Expr ::= Term AddTermList
+		|
+		MINUS Term AddTermList
 		;
-Term ::= Factor;
+		
+AddTermList ::= AddTermList AddTerm
+				|
+				/*epsilon*/
+				;
+AddTerm ::= Addop Term;						
+
+Term ::= Factor MulFacList;
+
+MulFacList ::= MulFacList MulFac
+			|
+			/*epsilon*/
+			;
+			
+MulFac ::= Mulop Factor;			
 
 Factor ::= NUMBER
 		|
 		Designator 
 		|
 		Designator O_ZAG ActualPars Z_ZAG
+		|
+		CHAR_CONST
+		|
+		STR_CONST
+		|
+		NEW Type 
+		|
+		NEW Type O_UGL_ZAG Expr Z_UGL_ZAG
+		|
+		O_ZAG Expr Z_ZAG
 		;
 
-ActualPars ::= ActualParamList
-			|
-			/*epsilon*/
-			;
 
-ActualParamList ::= ActualParamList ZAREZ Expr
-					|
-					Expr
-					;
-Designator ::=IDENT;
+Designator ::=IDENT DesList;
 
-Addop ::= PLUS;			
+DesList ::= DesList Des
+		|
+		/*epsilon*/
+		;
+		
+Des ::= TACKA IDENT
+		|
+		O_UGL_ZAG Expr Z_UGL_ZAG
+		;		
+
+Relop ::= JEDNAKO_JEDNAKO
+		|
+		UZVICNIK_JEDNAKO
+		|
+		VECE
+		|
+		VECE_JEDNAKO
+		|
+		MANJE
+		|
+		MANJE_JEDNAKO
+		;
+
+Addop ::= PLUS | MINUS;
+
+Mulop ::= PUTA | PODELJENO | PROCENAT;			
 				
 				
