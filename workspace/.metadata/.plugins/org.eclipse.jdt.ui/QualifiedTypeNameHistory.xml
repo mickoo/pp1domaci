@@ -12,4 +12,5 @@
 <fullyQualifiedTypeName name="java_cup.runtime.Symbol"/>
 <fullyQualifiedTypeName name="java.util.logging.Logger"/>
 <fullyQualifiedTypeName name="java.io.File"/>
+<fullyQualifiedTypeName name="java_cup.parser"/>
 </qualifiedTypeNameHistroy>

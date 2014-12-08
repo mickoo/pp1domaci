@@ -10,7 +10,17 @@ parser code {:
 	
 	//Logger log = Logger.getLogger(getClass());
 	
-	int printCallCount = 0;
+	int dekChar = 0;
+	int dekGlobNizova = 0;
+	int defFunkcijaUProgramu= 0;
+	int defUnutrasnjihKlasa = 0;
+	int blokoviNaredbi = 0;
+	int pozivFunkcijaUMain =0;
+	int brojNewNaredbi =0;
+	int defMetodaUnutrasnjihKlasa =0;
+	int dekPoljaUnutrasnjihKlasa =0;
+	int brojIzvodjenja =0;
+	
    
    
     // slede redefinisani metodi za prijavu gresaka radi izmene teksta poruke
@@ -45,9 +55,12 @@ parser code {:
 
 scan with {:
 	Symbol s = this.getScanner().next_token();
-	if (s != null && s.value != null) 
-		//log.info(s.toString() + " " + s.value.toString());
+	if (s != null && s.value != null)
+	 {
+		if(s.value.toString().equals("char"))dekChar++;
 		System.out.println(s.toString() + " " + s.value.toString() );
+		
+	}
 	return s;
 :}
 
@@ -59,7 +72,7 @@ terminal IF , ELSE, CONST,CHAR_CONST,BOOL_CONST,STR_CONST,O_UGL_ZAG, Z_UGL_ZAG,C
 terminal MINUS,NEW,TACKA,JEDNAKO_JEDNAKO,MANJE,VECE,VECE_JEDNAKO,MANJE_JEDNAKO,PUTA,PODELJENO,PROCENAT,UZVICNIK_JEDNAKO;
 
 non terminal Program, VarDeclList, MethodDeclList,VarDecl,Type,MethodDecl;
-non terminal FormPars,Addop,Factor,ActualPars;
+non terminal FormPars,Addop,Factor;
 non terminal Statement,StatementList,Designator,Expr,Term;
 non terminal Matched,Unmatched,Something;
 
@@ -121,14 +134,14 @@ Niz ::= O_UGL_ZAG Z_UGL_ZAG
 
 
 
-ClassDecl ::= CLASS IDENT EXTENDS Type O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG
+ClassDecl ::= CLASS IDENT O_VIT_ZAG VarDeclList  Z_VIT_ZAG
 			  |
 			  CLASS IDENT  O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG
 			  |
 			  CLASS IDENT EXTENDS Type O_VIT_ZAG VarDeclList  Z_VIT_ZAG
 			  |
-			  CLASS IDENT O_VIT_ZAG VarDeclList  Z_VIT_ZAG
-				;
+			  CLASS IDENT EXTENDS Type O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG
+			  ;
 
 
 
@@ -157,28 +170,26 @@ FormParamDecList ::= FormParamDecList FormParamDec
 
 FormParamDec ::= 	ZAREZ Type IDENT Niz ;
 					
-Type ::= IDENT ;
+Type ::= IDENT  ;
 
 StatementList ::= StatementList Statement
 				|
 				/*epsilon*/
 				;
 
-Statement ::= Matched | Unmatched;
+Statement ::= Matched | Unmatched | WHILE O_ZAG Condition Z_ZAG Statement  ;
 
 Unmatched ::= IF O_ZAG Condition Z_ZAG Statement | IF O_ZAG Condition Z_ZAG Matched ELSE Unmatched;
 
-Matched ::= Designator Something TACKA_ZAREZ
-			|
-			WHILE O_ZAG Condition Z_ZAG Matched   /*MOZE BITI PROBLEM STO NE STOJI Statement UMESTO Matched */
+Matched ::= Designator Something TACKA_ZAREZ 
 			|
 			BREAK TACKA_ZAREZ
 			|
 			READ O_ZAG Designator Z_ZAG TACKA_ZAREZ
 			|
-			PRINT O_ZAG Expr Z_ZAG TACKA_ZAREZ
+			PRINT O_ZAG Expr Z_ZAG TACKA_ZAREZ 
 			|
-			PRINT O_ZAG Expr ZAREZ NUMBER Z_ZAG TACKA_ZAREZ
+			PRINT O_ZAG Expr ZAREZ NUMBER Z_ZAG TACKA_ZAREZ 
 			|
 			O_VIT_ZAG StatementList  Z_VIT_ZAG
 			|
@@ -234,7 +245,7 @@ CondFact ::= Expr
 			Expr Relop Expr
 			;	
 
-Expr ::= Term AddTermList
+Expr ::= Term AddTermList 
 		|
 		MINUS Term AddTermList
 		;
@@ -258,7 +269,7 @@ Factor ::= NUMBER
 		|
 		Designator 
 		|
-		Designator O_ZAG ActualPars Z_ZAG
+		Designator O_ZAG ActPars Z_ZAG 
 		|
 		CHAR_CONST
 		|

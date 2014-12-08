@@ -1,0 +1,14 @@
+program Program
+
+
+{
+void main(){
+
+
+
+print(vars());
+
+
+}
+
+}
