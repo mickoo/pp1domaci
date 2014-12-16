@@ -1,0 +1,51 @@
+package rs.ac.bg.etf.pp1;
+
+import java.util.LinkedList;
+import java_cup.runtime.*;
+
+public class Kontekst {
+	private static LinkedList<Symbol> lista;
+	private static boolean MAINflag;
+	private static boolean CLASSflag;
+	private static int brZag;
+	private static int brZagCLASS;
+	
+	private static boolean program;
+	private static int brZagGlob=0;
+	
+	public Kontekst(){ lista=new LinkedList();brZag=0;MAINflag=false;CLASSflag=false;brZagCLASS=0;globalna=false;   }
+	
+	public static void push(Symbol s)
+	{
+		if(!lista.isEmpty() && (lista.getLast().value.toString().equals("int") || lista.getLast().value.toString().equals("void")  ) )
+		{
+			if(s.value.toString().equals("main"))MAINflag=true;
+			
+		}
+		if(MAINflag && s.value.toString().equals("{") )brZag++;
+		if(MAINflag && s.value.toString().equals("}") ){brZag--; if(brZag<=0)MAINflag=false;   }
+		
+		if(s.value.toString().equals("class") )CLASSflag=true;
+		if(CLASSflag && s.value.toString().equals("{") )brZagCLASS++;
+		if(CLASSflag && s.value.toString().equals("}") ){brZagCLASS--; if(brZagCLASS<=0)CLASSflag=false;}
+		
+		if(s.value.toString().equals("program"))program=true;
+		if(program && s.value.toString().equals("{")){brZagGlob++; }
+		if(program && s.value.toString().equals("}")){brZagGlob--; }
+		
+		lista.addLast(s);
+	}
+	
+	public static boolean uMainu(){ if(brZag>0)return true;
+									else return false;
+								  }
+	
+	public static boolean uKlasi(){ if(brZagCLASS>0)return true;
+									else return false;
+								  }
+	public static boolean globalna(){ if(brZagGlob!=0)return false;
+										else return true;
+									}
+	
+	}
+

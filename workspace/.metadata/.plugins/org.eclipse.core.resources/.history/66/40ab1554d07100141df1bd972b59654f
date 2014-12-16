@@ -1,6 +1,0 @@
-program MJProgram
-int x,y;
-{
-	int main()
-	{}
-}

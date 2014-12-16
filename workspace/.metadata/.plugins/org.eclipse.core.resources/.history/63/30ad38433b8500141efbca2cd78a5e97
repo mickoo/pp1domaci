@@ -1,0 +1,31 @@
+package rs.ac.bg.etf.pp1;
+
+import java.util.LinkedList;
+import java_cup.runtime.*;
+
+public class Kontekst {
+	private static LinkedList<Symbol> lista;
+	private static boolean flag;
+	private static int brZag;
+	
+	public Kontekst(){ lista=new LinkedList();brZag=0;flag=false;   }
+	
+	public static void push(Symbol s)
+	{
+		if(!lista.isEmpty() && (lista.getLast().value.toString().equals("int") || lista.getLast().value.toString().equals("void")  ) )
+		{
+			if(s.value.toString().equals("main"))flag=true;
+			
+		}
+		if(flag && s.value.toString().equals("{") )brZag++;
+		if(flag && s.value.toString().equals("}") ){brZag--; if(brZag<=0)flag=false;   }
+		
+		
+		lista.addLast(s);
+	}
+	
+	public static boolean uMainu(){ if(brZag>0)return true;
+									else return false;
+								  }
+	}
+

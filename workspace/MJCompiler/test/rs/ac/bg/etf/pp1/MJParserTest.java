@@ -23,12 +23,19 @@ public static void main(String[] argv) throws Exception{
 		br = new BufferedReader(new FileReader(sourceCode));
 		Yylex lexer = new Yylex(br);
 		
+		Kontekst k=new Kontekst();
 		MJParser p = new MJParser(lexer);
         Symbol s = p.parse();  //pocetak parsiranja
         
-      //  log.info("Print calls = " + p.printCallCount);
+       
         System.out.println("Broj CHAR-ova: "+ p.dekChar);
-        
+        System.out.println("Broj Nizova: "+ p.dekGlobNizova);
+        System.out.println("Broj definicija funkcija: "+ p.defFunkcijaUProgramu);
+        System.out.println("Broj definicija unutrasnjih klasa: "+ p.defUnutrasnjihKlasa);
+        System.out.println("Broj blokova naredbi: "+ p.blokoviNaredbi);
+        System.out.println("Poziv funkcija u Mainu :" + p.pozivFunkcijaUMain);
+        System.out.println("Broj NEW naredbi :" + p.brojNewNaredbi);
+        System.out.println("Broj izvodjenja :" + p.brojIzvodjenja);
         
 	} 
 	finally {

@@ -8,6 +8,7 @@ parser code {:
 	
 	
 	
+	
 	//Logger log = Logger.getLogger(getClass());
 	
 	int dekChar = 0;
@@ -21,7 +22,7 @@ parser code {:
 	int dekPoljaUnutrasnjihKlasa =0;
 	int brojIzvodjenja =0;
 	
-   
+	
    
     // slede redefinisani metodi za prijavu gresaka radi izmene teksta poruke
      
@@ -57,8 +58,9 @@ scan with {:
 	Symbol s = this.getScanner().next_token();
 	if (s != null && s.value != null)
 	 {
-		if(s.value.toString().equals("char"))dekChar++;
-		System.out.println(s.toString() + " " + s.value.toString() );
+		if(s.value.toString().equals("char") && Kontekst.globalna())dekChar++;
+		Kontekst.push(s);
+		System.out.println(s.toString() + " " + s.value.toString());
 		
 	}
 	return s;
@@ -126,7 +128,7 @@ IdList ::= IdList Id
 					
 Id ::= ZAREZ IDENT Niz ;
 			
-Niz ::= O_UGL_ZAG Z_UGL_ZAG
+Niz ::= O_UGL_ZAG Z_UGL_ZAG {: if(Kontekst.globalna())parser.dekGlobNizova++; :}
 		|
 		/*epsilon*/
 		;
@@ -134,13 +136,13 @@ Niz ::= O_UGL_ZAG Z_UGL_ZAG
 
 
 
-ClassDecl ::= CLASS IDENT O_VIT_ZAG VarDeclList  Z_VIT_ZAG
+ClassDecl ::= CLASS IDENT O_VIT_ZAG VarDeclList  Z_VIT_ZAG	{: parser.defUnutrasnjihKlasa++; :}
 			  |
-			  CLASS IDENT  O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG
+			  CLASS IDENT  O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG {:  parser.defUnutrasnjihKlasa++; :}
 			  |
-			  CLASS IDENT EXTENDS Type O_VIT_ZAG VarDeclList  Z_VIT_ZAG
+			  CLASS IDENT EXTENDS Type O_VIT_ZAG VarDeclList  Z_VIT_ZAG {:  parser.defUnutrasnjihKlasa++; parser.brojIzvodjenja++; :}
 			  |
-			  CLASS IDENT EXTENDS Type O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG
+			  CLASS IDENT EXTENDS Type O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG {:  parser.defUnutrasnjihKlasa++;parser.brojIzvodjenja++; :}
 			  ;
 
 
@@ -150,7 +152,7 @@ MethodDeclList ::= MethodDeclList MethodDecl
 				/*epsilon*/
 				;
 
-MethodDecl ::= Prefix IDENT O_ZAG FormPars Z_ZAG VarDeclList O_VIT_ZAG StatementList Z_VIT_ZAG ;
+MethodDecl ::=Prefix IDENT O_ZAG FormPars Z_ZAG VarDeclList O_VIT_ZAG StatementList Z_VIT_ZAG  {:parser.defFunkcijaUProgramu++; :} ;
 
 Prefix ::=  Type
 			|
@@ -191,7 +193,7 @@ Matched ::= Designator Something TACKA_ZAREZ
 			|
 			PRINT O_ZAG Expr ZAREZ NUMBER Z_ZAG TACKA_ZAREZ 
 			|
-			O_VIT_ZAG StatementList  Z_VIT_ZAG
+			O_VIT_ZAG StatementList  Z_VIT_ZAG {: parser.blokoviNaredbi++; :}
 			|
 			RETURN Expr TACKA_ZAREZ
 			|
@@ -202,7 +204,7 @@ Matched ::= Designator Something TACKA_ZAREZ
 			
 Something ::= JEDNAKO Expr 
 			|
-			O_ZAG ActPars Z_ZAG
+			O_ZAG ActPars Z_ZAG {: if(Kontekst.uMainu())parser.pozivFunkcijaUMain++;  :}
 			|
 			PLUS_PLUS
 			|
@@ -269,15 +271,15 @@ Factor ::= NUMBER
 		|
 		Designator 
 		|
-		Designator O_ZAG ActPars Z_ZAG 
+		Designator O_ZAG ActPars Z_ZAG  {: if(Kontekst.uMainu())parser.pozivFunkcijaUMain++;  :}
 		|
 		CHAR_CONST
 		|
 		STR_CONST
 		|
-		NEW Type 
+		NEW Type {:  parser.brojNewNaredbi++; :}
 		|
-		NEW Type O_UGL_ZAG Expr Z_UGL_ZAG
+		NEW Type O_UGL_ZAG Expr Z_UGL_ZAG {:  parser.brojNewNaredbi++; :}
 		|
 		O_ZAG Expr Z_ZAG
 		;
