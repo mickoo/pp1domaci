@@ -36,6 +36,8 @@ public static void main(String[] argv) throws Exception{
         System.out.println("Poziv funkcija u Mainu :" + p.pozivFunkcijaUMain);
         System.out.println("Broj NEW naredbi :" + p.brojNewNaredbi);
         System.out.println("Broj izvodjenja :" + p.brojIzvodjenja);
+        System.out.println("Broj metoda unutar klase :" + p.defMetodaUnutrasnjihKlasa);
+        System.out.println("Broj def atributa unutar klase :" + p.dekPoljaUnutrasnjihKlasa);
         
 	} 
 	finally {

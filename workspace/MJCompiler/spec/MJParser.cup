@@ -97,6 +97,7 @@ Decl ::= ConstDecl
 		;
 			
 ConstDecl ::= CONST Type IDENT JEDNAKO Val  AssignValList  TACKA_ZAREZ;
+			 
 
 AssignValList ::= AssignValList AssignVal
 				|
@@ -119,14 +120,14 @@ VarDeclList ::= VarDeclList VarDecl
 				|
 				/*epsilon*/
 				;				
-VarDecl ::= Type IDENT Niz IdList TACKA_ZAREZ ;
+VarDecl ::= {:if(Kontekst.uKlasi())parser.dekPoljaUnutrasnjihKlasa++; :} Type IDENT Niz IdList TACKA_ZAREZ;
 			
 IdList ::= IdList Id
 			|
 			/*epsilon*/
 			;	
 					
-Id ::= ZAREZ IDENT Niz ;
+Id ::= ZAREZ IDENT Niz {:if(Kontekst.uKlasi())parser.dekPoljaUnutrasnjihKlasa++; :} ;
 			
 Niz ::= O_UGL_ZAG Z_UGL_ZAG {: if(Kontekst.globalna())parser.dekGlobNizova++; :}
 		|
@@ -152,7 +153,7 @@ MethodDeclList ::= MethodDeclList MethodDecl
 				/*epsilon*/
 				;
 
-MethodDecl ::=Prefix IDENT O_ZAG FormPars Z_ZAG VarDeclList O_VIT_ZAG StatementList Z_VIT_ZAG  {:parser.defFunkcijaUProgramu++; :} ;
+MethodDecl ::=Prefix IDENT O_ZAG FormPars Z_ZAG VarDeclList O_VIT_ZAG StatementList Z_VIT_ZAG  {:if(Kontekst.uKlasi())parser.defMetodaUnutrasnjihKlasa++;  parser.defFunkcijaUProgramu++; :} ;
 
 Prefix ::=  Type
 			|
@@ -203,6 +204,7 @@ Matched ::= Designator Something TACKA_ZAREZ
 			;
 			
 Something ::= JEDNAKO Expr 
+			
 			|
 			O_ZAG ActPars Z_ZAG {: if(Kontekst.uMainu())parser.pozivFunkcijaUMain++;  :}
 			|

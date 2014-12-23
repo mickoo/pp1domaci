@@ -1,0 +1,324 @@
+package rs.ac.bg.etf.pp1;
+
+import java_cup.runtime.*;
+import java.io.*;
+
+
+parser code {:
+	
+	
+	
+	
+	//Logger log = Logger.getLogger(getClass());
+	
+	int dekChar = 0;
+	int dekGlobNizova = 0;
+	int defFunkcijaUProgramu= 0;
+	int defUnutrasnjihKlasa = 0;
+	int blokoviNaredbi = 0;
+	int pozivFunkcijaUMain =0;
+	int brojNewNaredbi =0;
+	int defMetodaUnutrasnjihKlasa =0;
+	int dekPoljaUnutrasnjihKlasa =0;
+	int brojIzvodjenja =0;
+	
+	
+   
+    // slede redefinisani metodi za prijavu gresaka radi izmene teksta poruke
+     
+    public void report_fatal_error(String message, Object info) throws java.lang.Exception {
+      done_parsing();
+      report_error(message, info);
+ 
+    }
+  
+    public void syntax_error(Symbol cur_token) {
+        report_error("\nSintaksna greska", cur_token);
+        
+    }
+  
+    public void unrecovered_syntax_error(Symbol cur_token) throws java.lang.Exception {
+        report_fatal_error("Fatalna greska, parsiranje se ne moze nastaviti", cur_token);
+        
+    }
+
+    public void report_error(String message, Object info) {
+    	StringBuilder msg = new StringBuilder(message); 
+    	if (info instanceof Symbol)
+            msg.append (" na liniji ").append(((Symbol)info).left);
+        //log.error(msg.toString());
+        System.out.println(msg.toString());
+    }
+
+
+
+:}
+
+scan with {:
+	Symbol s = this.getScanner().next_token();
+	if (s != null && s.value != null)
+	 {
+		if(s.value.toString().equals("char") && Kontekst.globalna())dekChar++;
+		Kontekst.push(s);
+		System.out.println(s.toString() + " " + s.value.toString());
+		
+	}
+	return s;
+:}
+
+
+terminal PROGRAM , O_VIT_ZAG, Z_VIT_ZAG,TACKA_ZAREZ, O_ZAG, Z_ZAG, ZAREZ,PRINT,RETURN,PLUS,JEDNAKO,VOID;
+terminal Integer NUMBER ;
+terminal String IDENT;
+terminal IF , ELSE, CONST,CHAR_CONST,BOOL_CONST,STR_CONST,O_UGL_ZAG, Z_UGL_ZAG,CLASS,EXTENDS,WHILE,BREAK,READ,ILI,I,PLUS_PLUS,MINUS_MINUS;
+terminal MINUS,NEW,TACKA,JEDNAKO_JEDNAKO,MANJE,VECE,VECE_JEDNAKO,MANJE_JEDNAKO,PUTA,PODELJENO,PROCENAT,UZVICNIK_JEDNAKO;
+
+non terminal Program, VarDeclList, MethodDeclList,VarDecl,Type,MethodDecl;
+non terminal FormPars,Addop,Factor;
+non terminal Statement,StatementList,Designator,Expr,Term;
+non terminal Matched,Unmatched,Something;
+
+non terminal DeclList,Val,AssignValList,AssignVal ,Decl,ConstDecl,ClassDecl,Niz,IdList,Id;
+non terminal Prefix,FormParamDecList,FormParamDec,Condition,ActPars,ActList,CondTerm,Act,CondList,Cond,CondFact,FactList,Fact;
+non terminal Relop,AddTermList,AddTerm,MulFacList,MulFac,Mulop,DesList,Des;
+
+Program ::= PROGRAM IDENT DeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG;
+
+DeclList ::= DeclList Decl
+			|
+			/*epsilon*/
+			;
+
+Decl ::= ConstDecl
+		|
+		VarDecl
+		|
+		ClassDecl
+		;
+			
+ConstDecl ::= CONST Type IDENT JEDNAKO Val  AssignValList  TACKA_ZAREZ;
+
+AssignValList ::= AssignValList AssignVal
+				|
+				/*epsilon*/
+				;
+
+AssignVal ::=ZAREZ IDENT JEDNAKO Val ;
+
+Val ::= NUMBER
+		|
+		CHAR_CONST 
+		|
+		BOOL_CONST
+		|
+		STR_CONST
+		;			
+
+
+VarDeclList ::= VarDeclList VarDecl
+				|
+				/*epsilon*/
+				;				
+VarDecl ::= {:if(Kontekst.uKlasi())parser.dekPoljaUnutrasnjihKlasa++; :} Type IDENT Niz IdList TACKA_ZAREZ
+			|
+			error TACKA_ZAREZ
+			 ;
+			
+IdList ::= IdList Id
+			|
+			/*epsilon*/
+			;	
+					
+Id ::= ZAREZ IDENT Niz {:if(Kontekst.uKlasi())parser.dekPoljaUnutrasnjihKlasa++; :} ;
+			
+Niz ::= O_UGL_ZAG Z_UGL_ZAG {: if(Kontekst.globalna())parser.dekGlobNizova++; :}
+		|
+		/*epsilon*/
+		;
+			
+
+
+
+ClassDecl ::= CLASS IDENT O_VIT_ZAG VarDeclList  Z_VIT_ZAG	{: parser.defUnutrasnjihKlasa++; :}
+			  |
+			  CLASS IDENT  O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG {:  parser.defUnutrasnjihKlasa++; :}
+			  |
+			  CLASS IDENT  O_VIT_ZAG error O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG {:  parser.defUnutrasnjihKlasa++; :}
+			  |
+			  CLASS IDENT EXTENDS Type O_VIT_ZAG VarDeclList  Z_VIT_ZAG {:  parser.defUnutrasnjihKlasa++; parser.brojIzvodjenja++; :}
+			  |
+			  CLASS IDENT EXTENDS Type O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG {:  parser.defUnutrasnjihKlasa++;parser.brojIzvodjenja++; :}
+			  |
+			  CLASS IDENT EXTENDS Type O_VIT_ZAG error O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG {:  parser.defUnutrasnjihKlasa++;parser.brojIzvodjenja++; :}
+			  ;
+
+
+
+MethodDeclList ::= MethodDeclList MethodDecl
+				|
+				/*epsilon*/
+				;
+
+MethodDecl ::=Prefix IDENT O_ZAG FormPars Z_ZAG VarDeclList O_VIT_ZAG StatementList Z_VIT_ZAG  {:if(Kontekst.uKlasi())parser.defMetodaUnutrasnjihKlasa++;  parser.defFunkcijaUProgramu++; :} ;
+
+Prefix ::=  Type
+			|
+			VOID
+			;
+
+FormPars ::= Type IDENT Niz FormParamDecList
+			|
+			/*epsilon*/
+			;
+
+FormParamDecList ::= FormParamDecList FormParamDec
+					|
+					/*epsilon*/
+					;
+			
+
+FormParamDec ::= 	ZAREZ Type IDENT Niz ;
+					
+Type ::= IDENT  ;
+
+StatementList ::= StatementList Statement
+				|
+				/*epsilon*/
+				;
+
+Statement ::= Matched | Unmatched | WHILE O_ZAG Condition Z_ZAG Statement  ;
+
+Unmatched ::= IF O_ZAG Condition Z_ZAG Statement | IF O_ZAG Condition Z_ZAG Matched ELSE Unmatched;
+
+Matched ::= Designator Something TACKA_ZAREZ 
+			|
+			BREAK TACKA_ZAREZ
+			|
+			READ O_ZAG Designator Z_ZAG TACKA_ZAREZ
+			|
+			PRINT O_ZAG Expr Z_ZAG TACKA_ZAREZ 
+			|
+			PRINT O_ZAG Expr ZAREZ NUMBER Z_ZAG TACKA_ZAREZ 
+			|
+			O_VIT_ZAG StatementList  Z_VIT_ZAG {: parser.blokoviNaredbi++; :}
+			|
+			RETURN Expr TACKA_ZAREZ
+			|
+			RETURN TACKA_ZAREZ  
+			|
+			IF O_ZAG Condition Z_ZAG Matched ELSE Matched
+			;
+			
+Something ::= JEDNAKO Expr 
+			|
+			O_ZAG ActPars Z_ZAG {: if(Kontekst.uMainu())parser.pozivFunkcijaUMain++;  :}
+			|
+			PLUS_PLUS
+			|
+			MINUS_MINUS
+			; 							
+
+ActPars ::= Expr ActList
+			|
+			/*epsilon*/
+			 ;
+
+ActList ::= ActList Act
+			|
+			/*epsilon*/
+			;
+
+Act ::= ZAREZ Expr;
+
+
+
+Condition ::= CondTerm CondList;
+
+CondList ::= CondList Cond
+			|
+			/*epsilon*/
+			;
+
+Cond ::= ILI CondTerm;
+
+CondTerm ::= CondFact FactList ;
+
+FactList ::= FactList Fact
+		|
+		/*epsilon*/
+		; 
+Fact ::= I CondFact;	
+
+CondFact ::= Expr
+			|
+			Expr Relop Expr
+			;	
+
+Expr ::= Term AddTermList 
+		|
+		MINUS Term AddTermList
+		;
+		
+AddTermList ::= AddTermList AddTerm
+				|
+				/*epsilon*/
+				;
+AddTerm ::= Addop Term;						
+
+Term ::= Factor MulFacList;
+
+MulFacList ::= MulFacList MulFac
+			|
+			/*epsilon*/
+			;
+			
+MulFac ::= Mulop Factor;			
+
+Factor ::= NUMBER
+		|
+		Designator 
+		|
+		Designator O_ZAG ActPars Z_ZAG  {: if(Kontekst.uMainu())parser.pozivFunkcijaUMain++;  :}
+		|
+		CHAR_CONST
+		|
+		STR_CONST
+		|
+		NEW Type {:  parser.brojNewNaredbi++; :}
+		|
+		NEW Type O_UGL_ZAG Expr Z_UGL_ZAG {:  parser.brojNewNaredbi++; :}
+		|
+		O_ZAG Expr Z_ZAG
+		;
+
+
+Designator ::=IDENT DesList;
+
+DesList ::= DesList Des
+		|
+		/*epsilon*/
+		;
+		
+Des ::= TACKA IDENT
+		|
+		O_UGL_ZAG Expr Z_UGL_ZAG
+		;		
+
+Relop ::= JEDNAKO_JEDNAKO
+		|
+		UZVICNIK_JEDNAKO
+		|
+		VECE
+		|
+		VECE_JEDNAKO
+		|
+		MANJE
+		|
+		MANJE_JEDNAKO
+		;
+
+Addop ::= PLUS | MINUS;
+
+Mulop ::= PUTA | PODELJENO | PROCENAT;			
+				
+				
