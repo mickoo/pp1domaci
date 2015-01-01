@@ -23,6 +23,7 @@ parser code {:
 	int brojIzvodjenja =0;
 	
 	
+	
    
     // slede redefinisani metodi za prijavu gresaka radi izmene teksta poruke
      
@@ -96,7 +97,10 @@ Decl ::= ConstDecl
 		ClassDecl
 		;
 			
-ConstDecl ::= CONST Type IDENT JEDNAKO Val  AssignValList  TACKA_ZAREZ;
+ConstDecl ::= CONST Type IDENT JEDNAKO Val  AssignValList  TACKA_ZAREZ
+			|
+			error AssignValList TACKA_ZAREZ 
+			;
 			 
 
 AssignValList ::= AssignValList AssignVal
@@ -104,7 +108,10 @@ AssignValList ::= AssignValList AssignVal
 				/*epsilon*/
 				;
 
-AssignVal ::=ZAREZ IDENT JEDNAKO Val ;
+AssignVal ::=ZAREZ IDENT JEDNAKO Val
+			|
+			ZAREZ error 
+			 ;
 
 Val ::= NUMBER
 		|
@@ -120,7 +127,9 @@ VarDeclList ::= VarDeclList VarDecl
 				|
 				/*epsilon*/
 				;				
-VarDecl ::= {:if(Kontekst.uKlasi())parser.dekPoljaUnutrasnjihKlasa++; :} Type IDENT Niz IdList TACKA_ZAREZ;
+VarDecl ::= {:if(Kontekst.uKlasi())parser.dekPoljaUnutrasnjihKlasa++; :} Type IDENT Niz IdList TACKA_ZAREZ
+			
+			;
 			
 IdList ::= IdList Id
 			|
@@ -144,6 +153,18 @@ ClassDecl ::= CLASS IDENT O_VIT_ZAG VarDeclList  Z_VIT_ZAG	{: parser.defUnutrasn
 			  CLASS IDENT EXTENDS Type O_VIT_ZAG VarDeclList  Z_VIT_ZAG {:  parser.defUnutrasnjihKlasa++; parser.brojIzvodjenja++; :}
 			  |
 			  CLASS IDENT EXTENDS Type O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG {:  parser.defUnutrasnjihKlasa++;parser.brojIzvodjenja++; :}
+			  |
+			  CLASS IDENT O_VIT_ZAG error  Z_VIT_ZAG	
+			  |
+			  CLASS IDENT  O_VIT_ZAG error O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG 
+			  |
+			  CLASS IDENT EXTENDS Type O_VIT_ZAG error  Z_VIT_ZAG
+			  |
+			  CLASS IDENT EXTENDS Type O_VIT_ZAG error O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG 	 
+			  |
+			  CLASS IDENT error  O_VIT_ZAG VarDeclList  Z_VIT_ZAG 
+			  |
+			  CLASS IDENT error O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG 
 			  ;
 
 
@@ -153,7 +174,12 @@ MethodDeclList ::= MethodDeclList MethodDecl
 				/*epsilon*/
 				;
 
-MethodDecl ::=Prefix IDENT O_ZAG FormPars Z_ZAG VarDeclList O_VIT_ZAG StatementList Z_VIT_ZAG  {:if(Kontekst.uKlasi())parser.defMetodaUnutrasnjihKlasa++;  parser.defFunkcijaUProgramu++; :} ;
+MethodDecl ::=Prefix IDENT O_ZAG FormPars Z_ZAG VarDeclList O_VIT_ZAG StatementList Z_VIT_ZAG  {:if(Kontekst.uKlasi())parser.defMetodaUnutrasnjihKlasa++;  parser.defFunkcijaUProgramu++; :}
+			|
+			Prefix IDENT O_ZAG FormPars Z_ZAG error O_VIT_ZAG StatementList Z_VIT_ZAG 
+			|
+			Prefix IDENT O_ZAG error Z_ZAG VarDeclList O_VIT_ZAG StatementList Z_VIT_ZAG
+			 ;
 
 Prefix ::=  Type
 			|
@@ -171,7 +197,9 @@ FormParamDecList ::= FormParamDecList FormParamDec
 					;
 			
 
-FormParamDec ::= 	ZAREZ Type IDENT Niz ;
+FormParamDec ::= 	ZAREZ Type IDENT Niz
+				|
+				ZAREZ error ;
 					
 Type ::= IDENT  ;
 
@@ -180,11 +208,14 @@ StatementList ::= StatementList Statement
 				/*epsilon*/
 				;
 
-Statement ::= Matched | Unmatched | WHILE O_ZAG Condition Z_ZAG Statement  ;
+Statement ::= Matched | Unmatched | WHILE O_ZAG Condition Z_ZAG Statement | WHILE O_ZAG error Z_ZAG Statement  ;
 
-Unmatched ::= IF O_ZAG Condition Z_ZAG Statement | IF O_ZAG Condition Z_ZAG Matched ELSE Unmatched;
+Unmatched ::= IF O_ZAG Condition Z_ZAG Statement | IF O_ZAG Condition Z_ZAG Matched ELSE Unmatched
+				|
+				IF O_ZAG error Z_ZAG Statement | IF O_ZAG error Z_ZAG Matched ELSE Unmatched
+				;
 
-Matched ::= Designator Something TACKA_ZAREZ 
+Matched ::=  Something TACKA_ZAREZ 
 			|
 			BREAK TACKA_ZAREZ
 			|
@@ -201,16 +232,23 @@ Matched ::= Designator Something TACKA_ZAREZ
 			RETURN TACKA_ZAREZ  
 			|
 			IF O_ZAG Condition Z_ZAG Matched ELSE Matched
+			|
+			IF O_ZAG error Z_ZAG Matched ELSE Matched
 			;
 			
-Something ::= JEDNAKO Expr 
-			
+Something ::=Designator JEDNAKO Expr
+			| 
+			Designator JEDNAKO error
 			|
-			O_ZAG ActPars Z_ZAG {: if(Kontekst.uMainu())parser.pozivFunkcijaUMain++;  :}
+			Designator O_ZAG ActPars Z_ZAG {: if(Kontekst.uMainu())parser.pozivFunkcijaUMain++;  :}
 			|
-			PLUS_PLUS
+			error Z_ZAG
 			|
-			MINUS_MINUS
+			Designator O_ZAG ActPars error
+			|
+			Designator PLUS_PLUS
+			|
+			Designator MINUS_MINUS
 			; 							
 
 ActPars ::= Expr ActList
@@ -287,7 +325,8 @@ Factor ::= NUMBER
 		;
 
 
-Designator ::=IDENT DesList;
+Designator ::=IDENT DesList
+				;
 
 DesList ::= DesList Des
 		|
@@ -297,6 +336,9 @@ DesList ::= DesList Des
 Des ::= TACKA IDENT
 		|
 		O_UGL_ZAG Expr Z_UGL_ZAG
+		|
+		O_UGL_ZAG error Z_UGL_ZAG
+		
 		;		
 
 Relop ::= JEDNAKO_JEDNAKO

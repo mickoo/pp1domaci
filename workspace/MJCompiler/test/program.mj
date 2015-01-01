@@ -4,7 +4,7 @@ class A{
 int b;
 }
 
-const int pi = 3, e = 2;
+const int pi = 1 ,e =2 ;
 
 class B extends A{
 int i; int x[];
@@ -14,10 +14,14 @@ int i; int x[];
 class C extends B{
 A theA;
 string a;
+{
+void t(int a){}
+}
 }
 
 {
-void main() A a; C c; int i; int x[];
+void main() A a; C c;
+ int d; int x[];
 {
 a = new A;
 a.x = new int[5];
@@ -27,11 +31,11 @@ c.theA = a;
 c.x = new int[5];
 x = new int[3];
 i=0;
-read(c.i);
+re(q.dsd());
 while(i<5) {
 read(c.x[i]); read(c.theA.x[i]);
 i++;
 }
-print(c.getValue(c.theA.x[0]));
+djhkhh(a);
 }
 }
