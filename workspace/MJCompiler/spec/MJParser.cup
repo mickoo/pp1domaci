@@ -154,17 +154,21 @@ ClassDecl ::= CLASS IDENT O_VIT_ZAG VarDeclList  Z_VIT_ZAG	{: parser.defUnutrasn
 			  |
 			  CLASS IDENT EXTENDS Type O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG {:  parser.defUnutrasnjihKlasa++;parser.brojIzvodjenja++; :}
 			  |
+			  CLASS IDENT error  O_VIT_ZAG VarDeclList  Z_VIT_ZAG 
+			  |
+			  CLASS IDENT error O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG 
+			  |
+			  CLASS IDENT error  O_VIT_ZAG error  Z_VIT_ZAG
+			  |
+			  CLASS IDENT error  O_VIT_ZAG error O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG 
+			  |
 			  CLASS IDENT O_VIT_ZAG error  Z_VIT_ZAG	
 			  |
 			  CLASS IDENT  O_VIT_ZAG error O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG 
 			  |
 			  CLASS IDENT EXTENDS Type O_VIT_ZAG error  Z_VIT_ZAG
 			  |
-			  CLASS IDENT EXTENDS Type O_VIT_ZAG error O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG 	 
-			  |
-			  CLASS IDENT error  O_VIT_ZAG VarDeclList  Z_VIT_ZAG 
-			  |
-			  CLASS IDENT error O_VIT_ZAG VarDeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG 
+			  CLASS IDENT EXTENDS Type O_VIT_ZAG error O_VIT_ZAG MethodDeclList Z_VIT_ZAG Z_VIT_ZAG 
 			  ;
 
 
@@ -244,7 +248,7 @@ Something ::=Designator JEDNAKO Expr
 			|
 			error Z_ZAG
 			|
-			Designator O_ZAG ActPars error
+			Designator O_ZAG error
 			|
 			Designator PLUS_PLUS
 			|

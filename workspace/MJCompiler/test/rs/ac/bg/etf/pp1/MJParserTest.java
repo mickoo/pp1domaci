@@ -16,7 +16,7 @@ public static void main(String[] argv) throws Exception{
 	
 	Reader br = null;
 	try {
-		File sourceCode = new File("test/program.mj");
+		File sourceCode = new File("test/programGreske.mj");
 		//log.info("Compiling source file: " + sourceCode.getAbsolutePath());
 		System.out.println("Compiling source file: " + sourceCode.getAbsolutePath());
 		
