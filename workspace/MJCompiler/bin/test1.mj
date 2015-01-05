@@ -1,0 +1,7 @@
+program Program 
+const int a=5,b=6,c=6;
+const char b='b';
+{
+
+	void main(){}
+}

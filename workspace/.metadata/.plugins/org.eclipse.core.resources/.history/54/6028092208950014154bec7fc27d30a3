@@ -1,0 +1,6 @@
+program Program 
+const char a=5,b=6;
+{
+
+	void main(){}
+}

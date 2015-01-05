@@ -1,0 +1,6 @@
+program Program 
+const int a=5,b=6;
+{
+
+	void main(){}
+}

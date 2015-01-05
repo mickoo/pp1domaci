@@ -3,6 +3,9 @@ package rs.ac.bg.etf.pp1;
 import java_cup.runtime.*;
 import java.io.*;
 
+import rs.etf.pp1.symboltable.Tab;
+import rs.etf.pp1.symboltable.concepts.*;
+
 
 parser code {:
 	
@@ -50,10 +53,27 @@ parser code {:
         //log.error(msg.toString());
         System.out.println(msg.toString());
     }
-
-
+    
+     public void report_info(String message, Object info) {
+    	StringBuilder msg = new StringBuilder(message); 
+    	if (info instanceof Symbol)
+            msg.append (" na liniji ").append(((Symbol)info).left);
+        
+        System.out.println(msg.toString());
+    }
 
 :}
+
+init with {: 
+
+	Tab.init();
+	
+ :}
+
+
+action code {: boolean jesteNiz=false; 	Struct constT;						:}
+
+
 
 scan with {:
 	Symbol s = this.getScanner().next_token();
@@ -74,7 +94,7 @@ terminal String IDENT;
 terminal IF , ELSE, CONST,CHAR_CONST,BOOL_CONST,STR_CONST,O_UGL_ZAG, Z_UGL_ZAG,CLASS,EXTENDS,WHILE,BREAK,READ,ILI,I,PLUS_PLUS,MINUS_MINUS;
 terminal MINUS,NEW,TACKA,JEDNAKO_JEDNAKO,MANJE,VECE,VECE_JEDNAKO,MANJE_JEDNAKO,PUTA,PODELJENO,PROCENAT,UZVICNIK_JEDNAKO;
 
-non terminal Program, VarDeclList, MethodDeclList,VarDecl,Type,MethodDecl;
+non terminal Program, VarDeclList, MethodDeclList,VarDecl,MethodDecl;
 non terminal FormPars,Addop,Factor;
 non terminal Statement,StatementList,Designator,Expr,Term;
 non terminal Matched,Unmatched,Something;
@@ -83,7 +103,22 @@ non terminal DeclList,Val,AssignValList,AssignVal ,Decl,ConstDecl,ClassDecl,Niz,
 non terminal Prefix,FormParamDecList,FormParamDec,Condition,ActPars,ActList,CondTerm,Act,CondList,Cond,CondFact,FactList,Fact;
 non terminal Relop,AddTermList,AddTerm,MulFacList,MulFac,Mulop,DesList,Des;
 
-Program ::= PROGRAM IDENT DeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG;
+non terminal Obj ProgName;
+non terminal Struct Type;
+
+Program ::= PROGRAM ProgName:p DeclList O_VIT_ZAG MethodDeclList Z_VIT_ZAG
+{:
+	Tab.chainLocalSymbols(p);
+	Tab.closeScope(); 
+:}
+;
+
+ProgName::= IDENT:pName
+{:
+	RESULT = Tab.insert(Obj.Prog , pName,Tab.noType);
+	Tab.openScope();
+:}
+;
 
 DeclList ::= DeclList Decl
 			|
@@ -97,7 +132,15 @@ Decl ::= ConstDecl
 		ClassDecl
 		;
 			
-ConstDecl ::= CONST Type IDENT JEDNAKO Val  AssignValList  TACKA_ZAREZ
+ConstDecl ::= CONST Type:constType IDENT:constName JEDNAKO Val
+		{:
+			constT=constType;
+			parser.report_info("Deklarisana konstanta "+ constName+" na liniji "+ constNameleft, null);
+			Obj temp = Tab.find(constName);
+			if(temp!=Tab.noObj)parser.report_error("Vec postoji ime " + constName + " u tabeli simbola", null);
+			Tab.insert(Obj.Con, constName, constType);  
+		:}
+ 			 AssignValList  TACKA_ZAREZ
 			|
 			error AssignValList TACKA_ZAREZ 
 			;
@@ -108,7 +151,13 @@ AssignValList ::= AssignValList AssignVal
 				/*epsilon*/
 				;
 
-AssignVal ::=ZAREZ IDENT JEDNAKO Val
+AssignVal ::=ZAREZ IDENT:constName JEDNAKO Val
+			{:
+			parser.report_info("Deklarisana konstanta  "+ constName+" na liniji "+ constNameleft, null);
+			Obj temp = Tab.find(constName);
+			if(temp!=Tab.noObj)parser.report_error("Greska:Vec postoji ime " + constName + " u tabeli simbola", null);
+			Tab.insert(Obj.Con, constName, constT);  
+			:}
 			|
 			ZAREZ error 
 			 ;
@@ -138,12 +187,29 @@ IdList ::= IdList Id
 					
 Id ::= ZAREZ IDENT Niz {:if(Kontekst.uKlasi())parser.dekPoljaUnutrasnjihKlasa++; :} ;
 			
-Niz ::= O_UGL_ZAG Z_UGL_ZAG {: if(Kontekst.globalna())parser.dekGlobNizova++; :}
+Niz ::= O_UGL_ZAG Z_UGL_ZAG {: if(Kontekst.globalna())parser.dekGlobNizova++; :}{:jesteNiz=true;:}
 		|
-		/*epsilon*/
+		/*epsilon*/{:jesteNiz=false;:}
 		;
 			
-
+Type ::= IDENT:typeName
+{:
+	Obj typeNode = Tab.find(typeName);
+	if (typeNode == Tab.noObj) {
+		parser.report_error("Nije pronadjen tip " + typeName + " u tabeli simbola", null);
+		RESULT = Tab.noType;
+	}
+	else {
+		if (Obj.Type == typeNode.getKind()) {
+			RESULT = typeNode.getType();
+		}
+		else {
+			parser.report_error("Greska na liniji" + typeNameleft+ ": Ime " + typeName + " ne predstavlja tip ", null);
+			RESULT = Tab.noType;
+		}
+	}
+:}
+ ;
 
 
 ClassDecl ::= CLASS IDENT O_VIT_ZAG VarDeclList  Z_VIT_ZAG	{: parser.defUnutrasnjihKlasa++; :}
@@ -205,7 +271,7 @@ FormParamDec ::= 	ZAREZ Type IDENT Niz
 				|
 				ZAREZ error ;
 					
-Type ::= IDENT  ;
+
 
 StatementList ::= StatementList Statement
 				|

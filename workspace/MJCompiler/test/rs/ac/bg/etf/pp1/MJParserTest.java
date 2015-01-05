@@ -16,7 +16,7 @@ public static void main(String[] argv) throws Exception{
 	
 	Reader br = null;
 	try {
-		File sourceCode = new File("test/programGreske.mj");
+		File sourceCode = new File("test/test1.mj");
 		//log.info("Compiling source file: " + sourceCode.getAbsolutePath());
 		System.out.println("Compiling source file: " + sourceCode.getAbsolutePath());
 		
@@ -26,7 +26,7 @@ public static void main(String[] argv) throws Exception{
 		Kontekst k=new Kontekst();
 		MJParser p = new MJParser(lexer);
         Symbol s = p.parse();  //pocetak parsiranja
-        
+      
        
         System.out.println("Broj CHAR-ova: "+ p.dekChar);
         System.out.println("Broj Nizova: "+ p.dekGlobNizova);
