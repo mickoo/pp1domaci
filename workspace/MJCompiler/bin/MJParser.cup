@@ -71,7 +71,7 @@ init with {:
  :}
 
 
-action code {: boolean jesteNiz=false; 	Struct constT;						:}
+action code {:  	Struct constT,prom;						:}
 
 
 
@@ -99,7 +99,7 @@ non terminal FormPars,Addop,Factor;
 non terminal Statement,StatementList,Designator,Expr,Term;
 non terminal Matched,Unmatched,Something;
 
-non terminal DeclList,Val,AssignValList,AssignVal ,Decl,ConstDecl,ClassDecl,Niz,IdList,Id;
+non terminal DeclList,Val,AssignValList,AssignVal ,Decl,ConstDecl,ClassDecl,IdList,Id,Niz;
 non terminal Prefix,FormParamDecList,FormParamDec,Condition,ActPars,ActList,CondTerm,Act,CondList,Cond,CondFact,FactList,Fact;
 non terminal Relop,AddTermList,AddTerm,MulFacList,MulFac,Mulop,DesList,Des;
 
@@ -176,8 +176,23 @@ VarDeclList ::= VarDeclList VarDecl
 				|
 				/*epsilon*/
 				;				
-VarDecl ::= {:if(Kontekst.uKlasi())parser.dekPoljaUnutrasnjihKlasa++; :} Type IDENT Niz IdList TACKA_ZAREZ
+VarDecl ::= {:if(Kontekst.uKlasi())parser.dekPoljaUnutrasnjihKlasa++; :} Type:varType IDENT:varName Niz:n 
+		{:
 			
+			Obj temp = Tab.find(varName);
+			if(temp!=Tab.noObj)parser.report_error("Greska:Vec postoji ime " + varName + " u tabeli simbola", null);
+			if(n!=Tab.noObj){
+			prom=new Struct(3,varType);
+			Tab.insert(Obj.Var, varName, prom);
+			parser.report_info("Deklarisana promenljiva "+ varName+"[] na liniji "+ varNameleft, null);
+			}
+			else{
+			prom=varType;
+			Tab.insert(Obj.Var, varName, varType);
+			parser.report_info("Deklarisana promenljiva "+ varName+" na liniji "+ varNameleft, null);
+			}
+		:}	
+		IdList TACKA_ZAREZ
 			;
 			
 IdList ::= IdList Id
@@ -185,11 +200,27 @@ IdList ::= IdList Id
 			/*epsilon*/
 			;	
 					
-Id ::= ZAREZ IDENT Niz {:if(Kontekst.uKlasi())parser.dekPoljaUnutrasnjihKlasa++; :} ;
+Id ::= {:if(Kontekst.uKlasi())parser.dekPoljaUnutrasnjihKlasa++; :} ZAREZ IDENT:varName Niz:n
+{:
+			Obj temp = Tab.find(varName);
+			if(temp!=Tab.noObj)parser.report_error("Greska:Vec postoji ime " + varName + " u tabeli simbola", null);
+			if(n!=Tab.noObj){
+			Tab.insert(Obj.Var, varName, new Struct(3,prom));
+			parser.report_info("Deklarisana promenljiva "+ varName+"[] na liniji "+ varNameleft, null);
+			}
+			else{
+			Tab.insert(Obj.Var, varName, prom);
+			parser.report_info("Deklarisana promenljiva "+ varName+" na liniji "+ varNameleft, null);
+			}	
 			
-Niz ::= O_UGL_ZAG Z_UGL_ZAG {: if(Kontekst.globalna())parser.dekGlobNizova++; :}{:jesteNiz=true;:}
+			
+:}
+
+ ;
+			
+Niz ::= O_UGL_ZAG Z_UGL_ZAG {: if(Kontekst.globalna())parser.dekGlobNizova++; :}
 		|
-		/*epsilon*/{:jesteNiz=false;:}
+		/*epsilon*/{:RESULT=Tab.noObj;:}
 		;
 			
 Type ::= IDENT:typeName

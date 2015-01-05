@@ -1,6 +1,8 @@
 program Program 
-const int a=5,b=6,c=6;
-const char b='b';
+int a[] ,ba[],cs[],d,e,f;
+class A{
+int ba;
+}
 {
 
 	void main(){}

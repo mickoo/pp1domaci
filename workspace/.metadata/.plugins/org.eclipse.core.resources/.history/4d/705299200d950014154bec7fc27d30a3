@@ -1,0 +1,6 @@
+program Program 
+int a[];
+{
+
+	void main(){}
+}
